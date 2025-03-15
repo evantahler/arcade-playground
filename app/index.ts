@@ -76,7 +76,7 @@ function buildPrompt(question: string) {
 
 async function chat(
   question: string,
-  replace: string
+  replace: string = "..."
 ): Promise<string | undefined> {
   console.log(`\r\n[❓] Asking: ${question.replace(replace, " {...}")}\r\n`);
   const response = await client.chat.completions.create(buildPrompt(question));
