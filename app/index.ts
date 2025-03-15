@@ -74,6 +74,25 @@ response = await client.chat.completions.create({
 displayResponse(response);
 const userTableSchema = response.choices?.[0]?.message?.content;
 
+response = await client.chat.completions.create({
+  messages: [
+    {
+      role: "system",
+      content: SYSTEM_PROMPT,
+    },
+    {
+      role: "user",
+      content: "Get the schema of the table `messages`",
+    },
+  ],
+  model: "gpt-4o",
+  user: USER_ID,
+  tools: ["Sql.GetTableSchema"],
+  tool_choice: "generate",
+});
+displayResponse(response);
+const messagesTableSchema = response.choices?.[0]?.message?.content;
+
 console.log("\r\n⚙️ testing `Sql.ExecuteQuery`\r\n");
 
 response = await client.chat.completions.create({
@@ -103,6 +122,24 @@ response = await client.chat.completions.create({
     {
       role: "user",
       content: `Count how many users there are.  Additional context about the user's table: ${userTableSchema}`,
+    },
+  ],
+  model: "gpt-4o",
+  user: USER_ID,
+  tools: ["Sql.ExecuteQuery"],
+  tool_choice: "generate",
+});
+displayResponse(response);
+
+response = await client.chat.completions.create({
+  messages: [
+    {
+      role: "system",
+      content: SYSTEM_PROMPT,
+    },
+    {
+      role: "user",
+      content: `How many messages has each user sent?  Group by user id and name.  Additional context about the user's table: ${userTableSchema}.  Additional context about the messages table: ${messagesTableSchema}`,
     },
   ],
   model: "gpt-4o",

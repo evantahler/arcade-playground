@@ -30,33 +30,42 @@ Sql_GetTableSchema: Get the schema of a table
 ⚙️ testing `Sql.DiscoverTables`
 
 --- response ---
-The tables in the database are:
-
+The database contains the following tables:
 - users
 - messages
 --- tool calls ---
-Sql_DiscoverTables: {"connection_string":"postgresql://evan@localhost:5432/bun","schema_name":"public"}
+Sql_DiscoverTables: {"connection_string":"postgresql://evan@localhost:5432/bun"}
 ---
 
 ⚙️ testing `Sql.GetTableSchema`
 
 --- response ---
 The schema of the table `users` is:
-
-- id: int
-- name: str
-- email: str
-- password_hash: str
-- created_at: datetime
-- updated_at: datetime
+- `id: int`
+- `name: str`
+- `email: str`
+- `password_hash: str`
+- `created_at: datetime`
+- `updated_at: datetime`
 --- tool calls ---
 Sql_GetTableSchema: {"connection_string":"postgresql://evan@localhost:5432/bun","schema_name":"public","table_name":"users"}
+---
+--- response ---
+The schema of the table `messages` is as follows:
+
+- `id: int`
+- `body: str`
+- `user_id: int`
+- `created_at: datetime`
+- `updated_at: datetime`
+--- tool calls ---
+Sql_GetTableSchema: {"connection_string":"postgresql://evan@localhost:5432/bun","schema_name":"public","table_name":"messages"}
 ---
 
 ⚙️ testing `Sql.ExecuteQuery`
 
 --- response ---
-Here are the first 10 user names:
+Here are the first 10 user names from the `users` table:
 
 - new name
 - Evan
@@ -65,8 +74,17 @@ Here are the first 10 user names:
 Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT name FROM users LIMIT 10;"}
 ---
 --- response ---
-There are 3 users in the users table.
+There are 3 users in the table.
 --- tool calls ---
 Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT COUNT(*) FROM users;"}
+---
+--- response ---
+Here is the count of messages sent by each user, grouped by user id and name:
+
+- User ID: 3, Name: Evan, Message Count: 0
+- User ID: 12, Name: Admin, Message Count: 218
+- User ID: 1, Name: new name, Message Count: 2
+--- tool calls ---
+Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT users.id, users.name, COUNT(messages.id) AS message_count\nFROM users\nLEFT JOIN messages ON users.id = messages.user_id\nGROUP BY users.id, users.name;"}
 ---
 ```
