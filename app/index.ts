@@ -150,6 +150,25 @@ response = await client.chat.completions.create({
   tool_choice: "generate",
 });
 displayResponse(response);
+
+response = await client.chat.completions.create({
+  messages: [
+    {
+      role: "system",
+      content: SYSTEM_PROMPT,
+    },
+    {
+      role: "user",
+      content: `How many messages has each user sent?  Group by user id and name.  Respond not with text, but with an ascii-art bar chart representing this data. The database schema is: ${schemas}`,
+    },
+  ],
+  model: "gpt-4o",
+  user: USER_ID,
+  tools: ["Sql.ExecuteQuery"],
+  tool_choice: "generate",
+});
+displayResponse(response);
+
 /* --- */
 
 function displayResponse(response: Arcade.Chat.ChatResponse) {

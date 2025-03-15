@@ -21,7 +21,6 @@ The "app" (user of the tools) is a bun project. `bun install` to install the dep
 
 ```
 ➜  app bun start
-$ bun run --env-file=../.env index.ts
 ⚙️ Found the following tools:
 Sql_DiscoverTables: Discover all the tables in the database
 Sql_ExecuteQuery: Execute a query and return the results
@@ -31,6 +30,7 @@ Sql_GetTableSchema: Get the schema of a table
 
 --- response ---
 The database contains the following tables:
+
 - users
 - messages
 --- tool calls ---
@@ -40,9 +40,9 @@ Sql_DiscoverTables: {"connection_string":"postgresql://evan@localhost:5432/bun"}
 ⚙️ testing `Sql.GetTableSchema`
 
 --- response ---
-Here are the schemas for the tables:
+Here are the schemas of the tables in the database:
 
-**users table:**
+**users**
 - id: int
 - name: str
 - email: str
@@ -50,7 +50,7 @@ Here are the schemas for the tables:
 - created_at: datetime
 - updated_at: datetime
 
-**messages table:**
+**messages**
 - id: int
 - body: str
 - user_id: int
@@ -64,13 +64,13 @@ Sql_GetTableSchema: {"connection_string": "postgresql://evan@localhost:5432/bun"
 ⚙️ testing `Sql.ExecuteQuery`
 
 --- response ---
-Here are the names of the first 10 users in the database:
+Here are the first 10 user names from the database:
 
 - new name
 - Evan
 - Admin
 --- tool calls ---
-Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT name FROM users ORDER BY id LIMIT 10;"}
+Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT name FROM users LIMIT 10;"}
 ---
 --- response ---
 There are 3 users in the database.
@@ -78,10 +78,21 @@ There are 3 users in the database.
 Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT COUNT(*) FROM users;"}
 ---
 --- response ---
-- User ID: 3, Name: 'Evan', Messages Sent: 0
-- User ID: 12, Name: 'Admin', Messages Sent: 218
-- User ID: 1, Name: 'new name', Messages Sent: 2
+- User ID: 3, Name: Evan, Messages Sent: 0
+- User ID: 12, Name: Admin, Messages Sent: 218
+- User ID: 1, Name: new name, Messages Sent: 2
 --- tool calls ---
-Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT users.id, users.name, COUNT(messages.id) as message_count \nFROM users \nLEFT JOIN messages ON users.id = messages.user_id \nGROUP BY users.id, users.name;"}
+Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT users.id, users.name, COUNT(messages.id) AS message_count FROM users LEFT JOIN messages ON users.id = messages.user_id GROUP BY users.id, users.name"}
+---
+--- response ---
+```
+
+Evan |
+Admin | ████████████████████████████████████████████████████████████████████████████████████████████████████
+new name | ██
+
+```
+--- tool calls ---
+Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT u.id, u.name, COUNT(m.id) as message_count FROM users u LEFT JOIN messages m ON u.id = m.user_id GROUP BY u.id, u.name"}
 ---
 ```
