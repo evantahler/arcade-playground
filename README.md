@@ -85,13 +85,11 @@ Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","q
 Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT users.id, users.name, COUNT(messages.id) AS message_count FROM users LEFT JOIN messages ON users.id = messages.user_id GROUP BY users.id, users.name"}
 ---
 --- response ---
-```
 
 Evan |
-Admin | ████████████████████████████████████████████████████████████████████████████████████████████████████
+Admin | ██████████████████████████████████████████████
 new name | ██
 
-```
 --- tool calls ---
 Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT u.id, u.name, COUNT(m.id) as message_count FROM users u LEFT JOIN messages m ON u.id = m.user_id GROUP BY u.id, u.name"}
 ---
