@@ -52,6 +52,7 @@ response = await client.chat.completions.create({
   tool_choice: "generate",
 });
 displayResponse(response);
+const tables = response.choices?.[0]?.message?.content;
 
 console.log("\r\n⚙️ testing `Sql.GetTableSchema`\r\n");
 
@@ -63,7 +64,7 @@ response = await client.chat.completions.create({
     },
     {
       role: "user",
-      content: "Get the schema of the table `users`",
+      content: `Get the schemas of the tables in the database.  The tables are: ${tables}`,
     },
   ],
   model: "gpt-4o",
@@ -74,24 +75,25 @@ response = await client.chat.completions.create({
 displayResponse(response);
 const userTableSchema = response.choices?.[0]?.message?.content;
 
-response = await client.chat.completions.create({
-  messages: [
-    {
-      role: "system",
-      content: SYSTEM_PROMPT,
-    },
-    {
-      role: "user",
-      content: "Get the schema of the table `messages`",
-    },
-  ],
-  model: "gpt-4o",
-  user: USER_ID,
-  tools: ["Sql.GetTableSchema"],
-  tool_choice: "generate",
-});
-displayResponse(response);
-const messagesTableSchema = response.choices?.[0]?.message?.content;
+// response = await client.chat.completions.create({
+//   messages: [
+//     {
+//       role: "system",
+//       content: SYSTEM_PROMPT,
+//     },
+//     {
+//       role: "user",
+//       content: "Get the schema of the table `messages`",
+//     },
+//   ],
+//   model: "gpt-4o",
+//   user: USER_ID,
+//   tools: ["Sql.GetTableSchema"],
+//   tool_choice: "generate",
+// });
+// displayResponse(response);
+// const messagesTableSchema = response.choices?.[0]?.message?.content;
+const schemas = response.choices?.[0]?.message?.content;
 
 console.log("\r\n⚙️ testing `Sql.ExecuteQuery`\r\n");
 
@@ -103,7 +105,7 @@ response = await client.chat.completions.create({
     },
     {
       role: "user",
-      content: `Get the first 10 user's names.  Additional context about the user's table: ${userTableSchema}`,
+      content: `Get the first 10 user's names.  The database schema is: ${schemas}`,
     },
   ],
   model: "gpt-4o",
@@ -121,7 +123,7 @@ response = await client.chat.completions.create({
     },
     {
       role: "user",
-      content: `Count how many users there are.  Additional context about the user's table: ${userTableSchema}`,
+      content: `Count how many users there are.  The database schema is: ${schemas}`,
     },
   ],
   model: "gpt-4o",
@@ -139,7 +141,7 @@ response = await client.chat.completions.create({
     },
     {
       role: "user",
-      content: `How many messages has each user sent?  Group by user id and name.  Additional context about the user's table: ${userTableSchema}.  Additional context about the messages table: ${messagesTableSchema}`,
+      content: `How many messages has each user sent?  Group by user id and name.  The database schema is: ${schemas}`,
     },
   ],
   model: "gpt-4o",
