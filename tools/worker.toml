@@ -1,0 +1,10 @@
+[[worker]]
+
+[worker.config]
+id = "demo-worker"
+enabled = true
+timeout = 30
+retries = 3
+secret = "876712ab9dcbf8b2d80418e2e4d3ea39"
+[worker.local_source]
+packages = [ "./sql",]
