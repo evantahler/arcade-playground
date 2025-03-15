@@ -12,7 +12,7 @@ For all questions, you will use only the tools provided to you to answer the que
 For all questions, your database connection string is: "${DB_CONNECTION_STRING}".
 The SQL dialect is "${DB_DIALECT}".
 If a tool call requires a schema, and one has not been provided, assume the schema is "public".
-If a tool call produces a response with multiple entries, format your response as a markdown list, one per line.
+If a tool call produces a response with multiple entries, format your response as a markdown table, with one row per entry.
 `;
 
 const client = new Arcade({
@@ -31,150 +31,63 @@ sqlTools.items.forEach((tool) => {
   console.log(`${tool.function.name}: ${tool.function.description}`);
 });
 
-let response: Arcade.Chat.ChatResponse | null = null;
+const tables = await chat("Discover all the tables in the database");
+const schemas = await chat(
+  `Get the schemas of the tables in the database.  The tables are: ${tables}`,
+  tables
+);
+await chat(
+  `Get the first 10 user's names.  The database schema is: ${schemas}`,
+  schemas
+);
+await chat(
+  `Count how many users there are.  The database schema is: ${schemas}`,
+  schemas
+);
+await chat(
+  `How many messages has each user sent?  Group by user id and name.  The database schema is: ${schemas}`,
+  schemas
+);
+await chat(
+  `How many messages has each user sent?  Group by user id and name.  Respond not with text, but with an ascii-art bar chart representing this data. The database schema is: ${schemas}`,
+  schemas
+);
 
-console.log("\r\n⚙️ testing `Sql.DiscoverTables`\r\n");
+/* --- UTILITIES --- */
 
-response = await client.chat.completions.create({
-  messages: [
-    {
-      role: "system",
-      content: SYSTEM_PROMPT,
-    },
-    {
-      role: "user",
-      content: "Discover all the tables in the database",
-    },
-  ],
-  model: "gpt-4o",
-  user: USER_ID,
-  tools: ["Sql.DiscoverTables"],
-  tool_choice: "generate",
-});
-displayResponse(response);
-const tables = response.choices?.[0]?.message?.content;
+function buildPrompt(question: string) {
+  return {
+    messages: [
+      {
+        role: "system",
+        content: SYSTEM_PROMPT,
+      },
+      {
+        role: "user",
+        content: question,
+      },
+    ],
+    model: "gpt-4o",
+    user: USER_ID,
+    tools: ["Sql.ExecuteQuery"],
+    tool_choice: "generate",
+  };
+}
 
-console.log("\r\n⚙️ testing `Sql.GetTableSchema`\r\n");
-
-response = await client.chat.completions.create({
-  messages: [
-    {
-      role: "system",
-      content: SYSTEM_PROMPT,
-    },
-    {
-      role: "user",
-      content: `Get the schemas of the tables in the database.  The tables are: ${tables}`,
-    },
-  ],
-  model: "gpt-4o",
-  user: USER_ID,
-  tools: ["Sql.GetTableSchema"],
-  tool_choice: "generate",
-});
-displayResponse(response);
-const userTableSchema = response.choices?.[0]?.message?.content;
-
-// response = await client.chat.completions.create({
-//   messages: [
-//     {
-//       role: "system",
-//       content: SYSTEM_PROMPT,
-//     },
-//     {
-//       role: "user",
-//       content: "Get the schema of the table `messages`",
-//     },
-//   ],
-//   model: "gpt-4o",
-//   user: USER_ID,
-//   tools: ["Sql.GetTableSchema"],
-//   tool_choice: "generate",
-// });
-// displayResponse(response);
-// const messagesTableSchema = response.choices?.[0]?.message?.content;
-const schemas = response.choices?.[0]?.message?.content;
-
-console.log("\r\n⚙️ testing `Sql.ExecuteQuery`\r\n");
-
-response = await client.chat.completions.create({
-  messages: [
-    {
-      role: "system",
-      content: SYSTEM_PROMPT,
-    },
-    {
-      role: "user",
-      content: `Get the first 10 user's names.  The database schema is: ${schemas}`,
-    },
-  ],
-  model: "gpt-4o",
-  user: USER_ID,
-  tools: ["Sql.ExecuteQuery"],
-  tool_choice: "generate",
-});
-displayResponse(response);
-
-response = await client.chat.completions.create({
-  messages: [
-    {
-      role: "system",
-      content: SYSTEM_PROMPT,
-    },
-    {
-      role: "user",
-      content: `Count how many users there are.  The database schema is: ${schemas}`,
-    },
-  ],
-  model: "gpt-4o",
-  user: USER_ID,
-  tools: ["Sql.ExecuteQuery"],
-  tool_choice: "generate",
-});
-displayResponse(response);
-
-response = await client.chat.completions.create({
-  messages: [
-    {
-      role: "system",
-      content: SYSTEM_PROMPT,
-    },
-    {
-      role: "user",
-      content: `How many messages has each user sent?  Group by user id and name.  The database schema is: ${schemas}`,
-    },
-  ],
-  model: "gpt-4o",
-  user: USER_ID,
-  tools: ["Sql.ExecuteQuery"],
-  tool_choice: "generate",
-});
-displayResponse(response);
-
-response = await client.chat.completions.create({
-  messages: [
-    {
-      role: "system",
-      content: SYSTEM_PROMPT,
-    },
-    {
-      role: "user",
-      content: `How many messages has each user sent?  Group by user id and name.  Respond not with text, but with an ascii-art bar chart representing this data. The database schema is: ${schemas}`,
-    },
-  ],
-  model: "gpt-4o",
-  user: USER_ID,
-  tools: ["Sql.ExecuteQuery"],
-  tool_choice: "generate",
-});
-displayResponse(response);
-
-/* --- */
+async function chat(
+  question: string,
+  replace: string
+): Promise<string | undefined> {
+  console.log(`\r\n[❓] Asking: ${question.replace(replace, " {...}")}\r\n`);
+  const response = await client.chat.completions.create(buildPrompt(question));
+  displayResponse(response);
+  return response.choices?.[0]?.message?.content;
+}
 
 function displayResponse(response: Arcade.Chat.ChatResponse) {
   console.log("--- response ---");
   console.log(response.choices?.[0]?.message?.content);
-  console.log("--- tool calls ---");
+  console.log("\r\n--- tool calls ---");
   response.choices?.[0]?.message?.tool_calls?.map((tool) => {
     if (!tool || !tool.function) return;
     console.log(`${tool.function.name}: ${tool.function.arguments}`);

@@ -19,78 +19,107 @@ Then, run the local worker: `cd tools/sql && poetry run arcade dev`
 
 The "app" (user of the tools) is a bun project. `bun install` to install the deps, and run `bun start` to run the app. It's a little CLI test suite:
 
-```
-➜  app bun start
+````
 ⚙️ Found the following tools:
 Sql_DiscoverTables: Discover all the tables in the database
 Sql_ExecuteQuery: Execute a query and return the results
 Sql_GetTableSchema: Get the schema of a table
 
-⚙️ testing `Sql.DiscoverTables`
+[❓] Asking: Discover all the tables in the database
 
 --- response ---
 The database contains the following tables:
 
 - users
 - messages
+
 --- tool calls ---
-Sql_DiscoverTables: {"connection_string":"postgresql://evan@localhost:5432/bun"}
+Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT table_name FROM information_schema.tables WHERE table_schema='public'"}
 ---
 
-⚙️ testing `Sql.GetTableSchema`
+[❓] Asking: Get the schemas of the tables in the database.  The tables are:  {...}
 
 --- response ---
-Here are the schemas of the tables in the database:
+Here are the schemas for the tables in the database:
 
-**users**
-- id: int
-- name: str
-- email: str
-- password_hash: str
-- created_at: datetime
-- updated_at: datetime
+### users
+| Column Name  | Data Type                    |
+|--------------|------------------------------|
+| id           | integer                      |
+| created_at   | timestamp without time zone  |
+| updated_at   | timestamp without time zone  |
+| name         | character varying            |
+| email        | text                         |
+| password_hash| text                         |
 
-**messages**
-- id: int
-- body: str
-- user_id: int
-- created_at: datetime
-- updated_at: datetime
+### messages
+| Column Name  | Data Type                    |
+|--------------|------------------------------|
+| id           | integer                      |
+| user_id      | integer                      |
+| created_at   | timestamp without time zone  |
+| updated_at   | timestamp without time zone  |
+| body         | text                         |
+
 --- tool calls ---
-Sql_GetTableSchema: {"connection_string": "postgresql://evan@localhost:5432/bun", "schema_name": "public", "table_name": "users"}
-Sql_GetTableSchema: {"connection_string": "postgresql://evan@localhost:5432/bun", "schema_name": "public", "table_name": "messages"}
+Sql_ExecuteQuery: {"connection_string": "postgresql://evan@localhost:5432/bun", "query": "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'users'"}
+Sql_ExecuteQuery: {"connection_string": "postgresql://evan@localhost:5432/bun", "query": "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'messages'"}
 ---
 
-⚙️ testing `Sql.ExecuteQuery`
+[❓] Asking: Get the first 10 user's names.  The database schema is:  {...}
 
 --- response ---
 Here are the first 10 user names from the database:
 
-- new name
-- Evan
-- Admin
+| Name     |
+|----------|
+| new name |
+| Evan     |
+| Admin    |
+
 --- tool calls ---
 Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT name FROM users LIMIT 10;"}
 ---
+
+[❓] Asking: Count how many users there are.  The database schema is:  {...}
+
 --- response ---
 There are 3 users in the database.
---- tool calls ---
-Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT COUNT(*) FROM users;"}
----
---- response ---
-- User ID: 3, Name: Evan, Messages Sent: 0
-- User ID: 12, Name: Admin, Messages Sent: 218
-- User ID: 1, Name: new name, Messages Sent: 2
---- tool calls ---
-Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT users.id, users.name, COUNT(messages.id) AS message_count FROM users LEFT JOIN messages ON users.id = messages.user_id GROUP BY users.id, users.name"}
----
---- response ---
-
-Evan |
-Admin | ██████████████████████████████████████████████
-new name | ██
 
 --- tool calls ---
-Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT u.id, u.name, COUNT(m.id) as message_count FROM users u LEFT JOIN messages m ON u.id = m.user_id GROUP BY u.id, u.name"}
+Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT COUNT(*) AS user_count FROM users;"}
 ---
+
+[❓] Asking: How many messages has each user sent?  Group by user id and name.  The database schema is:  {...}
+
+--- response ---
+Here is the number of messages sent by each user, grouped by user ID and name:
+
+| User ID | User Name | Message Count |
+|---------|-----------|---------------|
+| 3       | Evan      | 0             |
+| 12      | Admin     | 218           |
+| 1       | new name  | 2             |
+
+--- tool calls ---
+Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT users.id, users.name, COUNT(messages.id) AS message_count FROM users LEFT JOIN messages ON users.id = messages.user_id GROUP BY users.id, users.name;"}
+---
+
+[❓] Asking: How many messages has each user sent?  Group by user id and name.  Respond not with text, but with an ascii-art bar chart representing this data. The database schema is:  {...}
+
+--- response ---
+User       | Messages Sent
+-----------+-------------------------------
+Admin      | ██████████████████████████████ 218
+new name   | ██ 2
+Evan       |   0
+
+--- tool calls ---
+Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","query":"SELECT u.id, u.name, COUNT(m.id) as message_count FROM users u LEFT JOIN messages m ON u.id = m.user_id GROUP BY u.id, u.name ORDER BY message_count DESC"}
+
+---
+
 ```
+
+```
+````
