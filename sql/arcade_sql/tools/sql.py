@@ -8,6 +8,8 @@ from arcade.sdk import tool, ToolContext
 #     column_name: str
 #     column_type: str
 
+# NOTE: There is no documentation on how to use the ToolContext & get_secret (I grabbed this from the source code and types).
+
 @tool(requires_secrets=["DATABASE_CONNECTION_STRING"])
 def discover_tables(context: ToolContext, schema_name: Annotated[str, "The database schema to discover tables in"] = "public") -> list[str]:
     """Discover all the tables in the database"""
