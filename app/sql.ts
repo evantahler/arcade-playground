@@ -3,13 +3,11 @@ import Arcade from "@arcadeai/arcadejs";
 const ARCADE_API_KEY = Bun.env.ARCADE_API_KEY;
 const ARCADE_URL = Bun.env.ARCADE_URL;
 const USER_ID = Bun.env.USER_ID;
-const DB_CONNECTION_STRING = Bun.env.DB_CONNECTION_STRING;
-const DB_DIALECT = DB_CONNECTION_STRING?.split(":")[0];
+const DB_DIALECT = "POSTGRES"; // change if needed
 
 const SYSTEM_PROMPT = `
 You are an expert SQL analyst.
 For all questions, you will use only the tools provided to you to answer the question, and no prior knowledge.
-For all questions, your database connection string is: "${DB_CONNECTION_STRING}".
 The SQL dialect is "${DB_DIALECT}".
 If a tool call requires a schema, and one has not been provided, assume the schema is "public".
 If a tool call produces a response with multiple entries, format your response as a markdown table, with one row per entry.
