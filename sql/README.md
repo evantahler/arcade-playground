@@ -29,7 +29,7 @@ tools for interacting with SQL databases
 
 ## Features
 
-- The sql toolkit does not have any features yet.
+-   The sql toolkit does not have any features yet.
 
 ## Install
 
@@ -38,3 +38,7 @@ Install this toolkit using pip:
 ```bash
 pip install arcade_sql
 ```
+
+## Secrets:
+
+`DATABASE_CONNECTION_STRING` is required. It's a JDBC-style connection string, like `postgresql://username:password@host:port/database`.
