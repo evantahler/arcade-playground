@@ -6,10 +6,10 @@ To install dependencies:
 bun install
 ```
 
-To run:
+Be sure that the tools are running
+
+To run the SQL playground:
 
 ```bash
-bun start
+bun sql
 ```
-
-This project was created using `bun init` in bun v1.1.42. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.

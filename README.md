@@ -17,7 +17,7 @@ Then, run the local worker: `cd tools/sql && poetry run arcade dev`
 
 ## App
 
-The "app" (user of the tools) is a bun project. `bun install` to install the deps, and run `bun start` to run the app. It's a little CLI test suite:
+runThe "app" (user of the tools) is a bun project. `bun install` to install the deps, and run `bun run sql` to run the app. It's a little CLI test suite:
 
 ````
 ⚙️ Found the following tools:
@@ -121,5 +121,4 @@ Sql_ExecuteQuery: {"connection_string":"postgresql://evan@localhost:5432/bun","q
 
 ```
 
-```
 ````

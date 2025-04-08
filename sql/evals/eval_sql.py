@@ -8,7 +8,7 @@ from arcade.sdk.eval import (
 )
 
 import arcade_sql
-from arcade_sql.tools.sql import say_hello
+from sql.arcade_sql.tools.sql import say_hello
 
 # Evaluation rubric
 rubric = EvalRubric(

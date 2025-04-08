@@ -1,15 +1,15 @@
 [tool.poetry]
 name = "arcade_sql"
 version = "0.0.1"
-description = "run sql tools"
+description = "tools for interacting with SQL databases"
 authors = ["evantahler <evan@evantahler.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-arcade-ai = "^1.1.1"
-sqlalchemy = "^2.0.39"
-psycopg2 = "^2.9.10"
+arcade-ai = "^1.0.5"
+sqlalchemy = "^2.0.40"
 pydantic = "^2.10.6"
+psycopg2-binary = "^2.9.10"
 
 [tool.poetry.dev-dependencies]
 pytest = "^8.3.0"
@@ -20,7 +20,7 @@ tox = "^4.11.1"
 ruff = "^0.7.4"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.0.0,<2.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]

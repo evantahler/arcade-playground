@@ -25,7 +25,7 @@
 
 # Arcade sql Toolkit
 
-run sql tools
+tools for interacting with SQL databases
 
 ## Features
 

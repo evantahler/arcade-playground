@@ -1,7 +1,7 @@
 import pytest
 from arcade.sdk.errors import ToolExecutionError
 
-from arcade_sql.tools.sql import say_hello
+from sql.arcade_sql.tools.sql import say_hello
 
 
 def test_hello() -> None:

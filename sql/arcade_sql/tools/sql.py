@@ -1,32 +1,32 @@
 from typing import Annotated
 from sqlalchemy import create_engine,Engine,inspect,text
 
-from arcade.sdk import tool
+from arcade.sdk import tool, ToolContext
 
 # NOTE: it looks like tool responses are limited to simple python types (str, int, list, etc.)
 # class SqlColumn(BaseModel):
 #     column_name: str
 #     column_type: str
 
-@tool
-def discover_tables(connection_string: Annotated[str, "The connection string to the database"], schema_name: Annotated[str, "The database schema to discover tables in"] = "public") -> list[str]:
+@tool(requires_secrets=["DATABASE_CONNECTION_STRING"])
+def discover_tables(context: ToolContext, schema_name: Annotated[str, "The database schema to discover tables in"] = "public") -> list[str]:
     """Discover all the tables in the database"""
-    engine = _get_engine(connection_string)
+    engine = _get_engine(context.get_secret("DATABASE_CONNECTION_STRING"))
     tables = _get_tables(engine, schema_name)
     return tables
 
 
-@tool
-def get_table_schema(connection_string: Annotated[str, "The connection string to the database"], schema_name: Annotated[str, "The database schema to get the table schema of"], table_name: Annotated[str, "The table to get the schema of"]) -> list[str]:
+@tool(requires_secrets=["DATABASE_CONNECTION_STRING"])
+def get_table_schema(context: ToolContext, schema_name: Annotated[str, "The database schema to get the table schema of"], table_name: Annotated[str, "The table to get the schema of"]) -> list[str]:
     """Get the schema of a table"""
-    engine = _get_engine(connection_string)
+    engine = _get_engine(context.get_secret("DATABASE_CONNECTION_STRING"))
     return _get_table_schema(engine, schema_name, table_name)
 
 
-@tool
-def execute_query(connection_string: Annotated[str, "The connection string to the database"], query: Annotated[str, "The SQL query to execute"]) -> list[str]:
+@tool(requires_secrets=["DATABASE_CONNECTION_STRING"])
+def execute_query(context: ToolContext, query: Annotated[str, "The SQL query to execute"]) -> list[str]:
     """Execute a query and return the results"""
-    engine = _get_engine(connection_string)
+    engine = _get_engine(context.get_secret("DATABASE_CONNECTION_STRING"))
     return _execute_query(engine, query)
 
 

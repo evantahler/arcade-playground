@@ -1,0 +1,8 @@
+[[worker]]
+
+[worker.config]
+id = "sql"
+secret = "changeme123"  # Replace with a secure secret
+
+[worker.local_source]
+packages = ["."]  # Path to your toolkit directory
