@@ -55,15 +55,28 @@ def test_add_get_remove_document(db: DuckDBDatabase):
     assert doc is None
 
 
-def test_uris_are_unique(db: DuckDBDatabase):
+def test_uris_are_unique_and_will_update_if_the_uri_already_exists(db: DuckDBDatabase):
     db.add_collection("test_collection")
     db.add_document("test_collection", "uri_1", "title_1", "body_1", "summary_1", {"key": "value"})
     doc = db.get_document("test_collection", "uri_1")
     assert doc is not None
-    with pytest.raises(DuckDBError):
-        db.add_document(
-            "test_collection", "uri_1", "title_1", "body_1", "summary_1", {"key": "value"}
-        )
+    first_created_at = doc.created_at
+    first_updated_at = doc.updated_at
+
+    db.add_document("test_collection", "uri_1", "title_2", "body_2", "summary_2", {"key": "value"})
+
+    count = db.connection.execute(
+        "SELECT COUNT(*) FROM test_collection WHERE uri = 'uri_1'"
+    ).fetchone()
+    assert count is not None
+    assert count[0] == 1
+
+    doc = db.get_document("test_collection", "uri_1")
+    assert doc is not None
+    assert doc.title == "title_2"
+    assert doc.body == "body_2"
+    assert doc.created_at == first_created_at
+    assert doc.updated_at != first_updated_at
 
 
 def test_find_relevant_documents(db: DuckDBDatabase):

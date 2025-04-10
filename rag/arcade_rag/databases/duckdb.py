@@ -21,7 +21,7 @@ class DuckDBDatabase(Database):
 
         self.connection.execute(f"""
           CREATE TABLE {collection_name} (
-          uri TEXT UNIQUE,
+          uri TEXT,
           title TEXT,
           body TEXT,
           summary TEXT,
@@ -33,6 +33,10 @@ class DuckDBDatabase(Database):
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )""")
+
+        self.connection.execute(
+            f"CREATE UNIQUE INDEX idx_uri_chunk_id ON {collection_name} (uri, chunk_id)"
+        )
 
     def remove_collection(self, collection_name: str):
         collection_name = self.sanitize_collection_name(collection_name)
@@ -78,6 +82,18 @@ class DuckDBDatabase(Database):
                 chunk_id
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (uri, chunk_id) DO UPDATE SET
+                uri = EXCLUDED.uri,
+                title = EXCLUDED.title,
+                body = EXCLUDED.body,
+                summary = EXCLUDED.summary,
+                metadata = EXCLUDED.metadata,
+                body_embedding = EXCLUDED.body_embedding,
+                summary_embedding = EXCLUDED.summary_embedding,
+                metadata_embedding = EXCLUDED.metadata_embedding,
+                chunk_id = EXCLUDED.chunk_id,
+                created_at = created_at,
+                updated_at = NOW()
             """,
             [
                 uri,
@@ -91,6 +107,7 @@ class DuckDBDatabase(Database):
                 chunk_id,
             ],
         )
+
         return True
 
     def remove_document(self, collection_name: str, uri: str):
@@ -117,6 +134,8 @@ class DuckDBDatabase(Database):
                 metadata=json.loads(doc_dict["metadata"]),
                 chunk_id=doc_dict["chunk_id"],
                 score=None,
+                created_at=doc_dict["created_at"],
+                updated_at=doc_dict["updated_at"],
             )
         return None
 
@@ -163,6 +182,8 @@ class DuckDBDatabase(Database):
                 metadata=json.loads(row["metadata"]),
                 chunk_id=row["chunk_id"],
                 score=row["body_score"] + row["summary_score"] + row["metadata_score"],
+                created_at=row["created_at"],
+                updated_at=row["updated_at"],
             )
             for _, row in result.iterrows()
         ]

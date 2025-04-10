@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -11,6 +12,8 @@ class Document(BaseModel):
     metadata: dict
     chunk_id: int
     score: float | None
+    created_at: datetime
+    updated_at: datetime
 
 
 class Database(ABC):
