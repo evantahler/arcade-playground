@@ -3,7 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "sql": "bun run --env-file=../.env sql.ts"
+    "sql": "bun run --env-file=../.env sql.ts",
+    "rag": "bun run --env-file=../.env rag.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
