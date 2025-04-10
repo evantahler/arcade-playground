@@ -7,6 +7,10 @@ authors = ["evantahler <evan@evantahler.com>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 arcade-ai = "^1.0.5"
+pydantic = "^2.11.3"
+duckdb = "^1.2.2"
+numpy = "^2.2.4"
+pandas = "^2.2.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^8.3.0"
