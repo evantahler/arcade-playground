@@ -33,8 +33,8 @@ def execute_query(context: ToolContext, query: Annotated[str, "The SQL query to 
 
 
 def _get_engine(connection_string: str) -> Engine:
-    """Get a connection to the database"""
-    return create_engine(connection_string)
+    """Get a connection to the database.  Note that we build the engine with an isolation level of READ UNCOMMITTED to prevent all writes."""
+    return create_engine(connection_string, isolation_level='READ UNCOMMITTED')
 
 
 def _get_tables(engine: Engine, schema_name: str) -> list[str]:
@@ -55,7 +55,7 @@ def _get_table_schema(engine: Engine, schema_name: str, table_name: str) -> list
     return [f"{column['name']}: {column['type'].python_type.__name__}" for column in columns_table]
 
 def _execute_query(engine: Engine, query: str) -> list[str]:
-    """Execute a query and return the results"""
+    """Execute a query and return the results."""
     with engine.connect() as connection:
         result = connection.execute(text(query))
         return [str(row) for row in result.fetchall()]
