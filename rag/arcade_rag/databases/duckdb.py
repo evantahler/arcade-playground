@@ -42,6 +42,12 @@ class DuckDBDatabase(Database):
         collection_name = self.sanitize_collection_name(collection_name)
         self.connection.execute(f"DROP TABLE {collection_name}")
 
+    def list_collections(self) -> list[str]:
+        rows = self.connection.execute(
+            "SELECT table_name FROM information_schema.tables"
+        ).fetchall()
+        return [row[0] for row in rows]
+
     def check_collection_exists(self, collection_name: str) -> bool:
         collection_name = self.sanitize_collection_name(collection_name)
         return (

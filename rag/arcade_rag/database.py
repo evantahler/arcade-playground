@@ -34,6 +34,10 @@ class Database(ABC):
         pass
 
     @abstractmethod
+    def list_collections(self) -> list[str]:
+        pass
+
+    @abstractmethod
     def check_collection_exists(self, collection_name: str) -> bool:
         pass
 
