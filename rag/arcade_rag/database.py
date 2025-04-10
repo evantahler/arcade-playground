@@ -10,6 +10,7 @@ class Document(BaseModel):
     summary: str
     metadata: dict
     chunk_id: int
+    score: float | None
 
 
 class Database(ABC):
@@ -55,7 +56,7 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def get_document(self, collection_name: str, uri: str) -> Document:
+    def get_document(self, collection_name: str, uri: str) -> Document | None:
         pass
 
     @abstractmethod
