@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from arcade.sdk import tool, ToolContext
+from arcade.sdk import ToolContext, tool
 
 from arcade_rag.database import Document
 from arcade_rag.databases.duckdb import DuckDBDatabase
