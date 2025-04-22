@@ -8,4 +8,4 @@ retries = 3
 secret = "01112ea7d068a63a42ff032b7dbaa697"
 
 [worker.local_source]
-packages = [ "./sql", "./rag" ]
+packages = [ "./sql", "./rag", "./parse" ]
