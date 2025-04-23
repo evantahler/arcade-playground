@@ -12,7 +12,7 @@ DEFAULT_SUMMARY_KEYS = ["title", "author", "date", "summary", "main_keyword", "k
 
 @tool()
 def parse_document(file_url_or_path: Annotated[str, "The url or path to the file to parse"]) -> str:
-    """Parse the given file and return the text within it."""
+    """Parse the given file and return the text within it as Markdown."""
     return _parse_document(file_url_or_path)
 
 @tool(requires_secrets=['OPENAI_API_KEY'])
@@ -27,7 +27,7 @@ def extract_metadata(context: ToolContext, text: Annotated[str, "The text to sum
 
 def _parse_document(file_url_or_path: str) -> str:
     result = md.convert(file_url_or_path)
-    return result.text_content
+    return result.markdown
 
 def _summarize(OPENAI_API_KEY:str, text: str, keys: list[str] = DEFAULT_SUMMARY_KEYS) -> str:
     client = OpenAI(api_key=OPENAI_API_KEY)
