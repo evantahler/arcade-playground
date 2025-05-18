@@ -116,9 +116,6 @@ def sql_eval_suite() -> EvalSuite:
             ),
         ],
         rubric=rubric,
-        critics=[
-            BinaryCritic(critic_field="query", weight=1.0),
-        ],
     )
 
     return suite

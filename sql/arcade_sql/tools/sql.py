@@ -53,7 +53,11 @@ def update_user_status(
     user_id: Annotated[int, "The ID of the user to update"],
     status: Annotated[USER_STATUSES, "The status to update the user to"],
 ) -> list[str]:
-    """You have a connection to a SQL database.  Update the status of a user in the SQL database.  The user status is stored in the 'status' column of the 'users' table"""  # noqa: E501
+    """
+    You have a connection to a SQL database.
+    Update the status of a user in the SQL database.
+    The user status is stored in the 'status' column of the 'users' table
+    """
     status = status.lower()
     engine = _get_engine(
         context.get_secret("DATABASE_CONNECTION_STRING"), isolation_level="READ COMMITTED"
