@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from arcade.sdk import ToolContext, tool
+from arcade.sdk.errors import RetryableToolError
 from sqlalchemy import Engine, create_engine, inspect, text
 
 # NOTE: it looks like tool responses are limited to simple python types (str, int, list, etc.)
@@ -16,7 +17,7 @@ def discover_tables(
     context: ToolContext,
     schema_name: Annotated[str, "The database schema to discover tables in"] = "public",
 ) -> list[str]:
-    """Discover all the tables in the database"""
+    """Discover all the tables in the SQL database when the list of tables is not known"""
     engine = _get_engine(context.get_secret("DATABASE_CONNECTION_STRING"))
     tables = _get_tables(engine, schema_name)
     return tables
@@ -28,7 +29,7 @@ def get_table_schema(
     schema_name: Annotated[str, "The database schema to get the table schema of"],
     table_name: Annotated[str, "The table to get the schema of"],
 ) -> list[str]:
-    """Get the schema of a table"""
+    """Get the schema of a table in the SQL database when the schema is not known, but the name of the table is provided"""  # noqa: E501
     engine = _get_engine(context.get_secret("DATABASE_CONNECTION_STRING"))
     return _get_table_schema(engine, schema_name, table_name)
 
@@ -37,9 +38,17 @@ def get_table_schema(
 def execute_query(
     context: ToolContext, query: Annotated[str, "The SQL query to execute"]
 ) -> list[str]:
-    """Execute a query and return the results"""
+    """Execute a query and return the results against the SQL database"""
     engine = _get_engine(context.get_secret("DATABASE_CONNECTION_STRING"))
-    return _execute_query(engine, query)
+    try:
+        return _execute_query(engine, query)
+    except Exception as e:
+        raise RetryableToolError from e(
+            "Query failed",
+            developer_message=f"Query '{query}' failed.",
+            additional_prompt_content="Load the database schema (<get_table_schema>) and try again.",  # noqa: E501
+            retry_after_ms=10,
+        )
 
 
 def _get_engine(connection_string: str) -> Engine:

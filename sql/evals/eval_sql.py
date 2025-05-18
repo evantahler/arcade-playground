@@ -1,5 +1,6 @@
 from arcade.sdk import ToolCatalog
 from arcade.sdk.eval import (
+    BinaryCritic,
     EvalRubric,
     EvalSuite,
     ExpectedToolCall,
@@ -8,7 +9,7 @@ from arcade.sdk.eval import (
 )
 
 import arcade_sql
-from sql.arcade_sql.tools.sql import say_hello
+from arcade_sql.tools.sql import discover_tables, execute_query, get_table_schema
 
 # Evaluation rubric
 rubric = EvalRubric(
@@ -34,16 +35,56 @@ def sql_eval_suite() -> EvalSuite:
     )
 
     suite.add_case(
-        name="Saying hello",
-        user_message="He's actually right here, say hi to him!",
-        expected_tool_calls=[ExpectedToolCall(func=say_hello, args={"name": "John Doe"})],
+        name="Get user by id (schema known)",
+        user_message="Tell me the name and email of user #1 in my database.  The table 'users' has the following schema: id: int, name: str, email: str, password_hash: str, created_at: datetime, updated_at: datetime",  # noqa: E501
+        expected_tool_calls=[
+            ExpectedToolCall(
+                func=execute_query, args={"query": "SELECT name, email FROM users WHERE id = 1"}
+            )
+        ],
+        rubric=rubric,
+        critics=[SimilarityCritic(critic_field="query", weight=1.0)],
+    )
+
+    suite.add_case(
+        name="Discover tables",
+        user_message="What tables are in my database?",
+        expected_tool_calls=[
+            ExpectedToolCall(func=discover_tables, args={}),
+        ],
+        rubric=rubric,
+    )
+
+    suite.add_case(
+        name="Get table schema (schema provided)",
+        user_message="What columns are in the table 'public.users' in my database?",
+        expected_tool_calls=[
+            ExpectedToolCall(
+                func=get_table_schema, args={"schema_name": "public", "table_name": "users"}
+            ),
+        ],
         rubric=rubric,
         critics=[
-            SimilarityCritic(critic_field="name", weight=0.5),
+            BinaryCritic(critic_field="schema_name", weight=0.5),
+            BinaryCritic(critic_field="table_name", weight=0.5),
         ],
+    )
+
+    suite.add_case(
+        name="Get table schema (schema not provided)",
+        user_message="What columns are in the table 'users' in my database?",
         additional_messages=[
-            {"role": "user", "content": "My friend's name is John Doe."},
-            {"role": "assistant", "content": "It is great that you have a friend named John Doe!"},
+            {"role": "user", "content": "When not provided, the schema is 'public'."}
+        ],
+        expected_tool_calls=[
+            ExpectedToolCall(
+                func=get_table_schema, args={"schema_name": "public", "table_name": "users"}
+            ),
+        ],
+        rubric=rubric,
+        critics=[
+            BinaryCritic(critic_field="schema_name", weight=0.5),
+            BinaryCritic(critic_field="table_name", weight=0.5),
         ],
     )
 
