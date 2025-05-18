@@ -54,6 +54,7 @@ def update_user_status(
     status: Annotated[USER_STATUSES, "The status to update the user to"],
 ) -> list[str]:
     """
+    THIS IS THE ONLY TOOL THAT CAN UPDATE THE DATABASE.  DO NOT USE ANY OTHER TOOL FOR UPDATES.
     You have a connection to a SQL database.
     Update the status of a user in the SQL database.
     The user status is stored in the 'status' column of the 'users' table
