@@ -55,9 +55,6 @@ def update_user_status(
 ) -> list[str]:
     """You have a connection to a SQL database.  Update the status of a user in the SQL database.  The user status is stored in the 'status' column of the 'users' table"""  # noqa: E501
     status = status.lower()
-    if status not in USER_STATUSES:
-        raise ValueError(f"Invalid status: {status}.  Valid statuses are: {USER_STATUSES}")  # noqa: TRY003
-
     engine = _get_engine(
         context.get_secret("DATABASE_CONNECTION_STRING"), isolation_level="READ COMMITTED"
     )
