@@ -2,7 +2,12 @@ import pytest
 from arcade.core.schema import ToolSecretItem
 from arcade.sdk import ToolContext
 
-from arcade_sql.tools.sql import discover_tables, execute_query, get_table_schema
+from arcade_sql.tools.sql import (
+    discover_tables,
+    execute_query,
+    get_table_schema,
+    update_user_status,
+)
 
 
 @pytest.fixture
@@ -30,6 +35,7 @@ def test_get_table_schema(mock_context) -> None:
         "password_hash: str",
         "created_at: datetime",
         "updated_at: datetime",
+        "status: str",
     ]
 
 
@@ -37,3 +43,8 @@ def test_execute_query(mock_context) -> None:
     assert execute_query(mock_context, "SELECT id, name, email FROM users WHERE id = 1") == [
         "(1, 'Mario', 'mario@example.com')"
     ]
+
+
+def test_update_user_status(mock_context) -> None:
+    print(update_user_status(mock_context, 1, "active"))
+    assert update_user_status(mock_context, 1, "active") == ["(1, 'mario@example.com', 'active')"]

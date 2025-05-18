@@ -1,4 +1,4 @@
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from arcade.sdk import ToolContext, tool
 from arcade.sdk.errors import RetryableToolError
@@ -58,12 +58,8 @@ def update_user_status(
     engine = _get_engine(
         context.get_secret("DATABASE_CONNECTION_STRING"), isolation_level="READ COMMITTED"
     )
-    query = text(
-        "UPDATE users SET status = :status WHERE id = :user_id LIMIT 1 RETURNING *",
-        status=status,
-        user_id=user_id,
-    )
-    return _execute_query(engine, query)
+    query = "UPDATE users SET status = :status WHERE id = :id RETURNING id, email, status"
+    return _execute_query(engine, query, params={"id": user_id, "status": status})
 
 
 def _get_engine(connection_string: str, isolation_level: str = "READ UNCOMMITTED") -> Engine:
@@ -89,8 +85,8 @@ def _get_table_schema(engine: Engine, schema_name: str, table_name: str) -> list
     return [f"{column['name']}: {column['type'].python_type.__name__}" for column in columns_table]
 
 
-def _execute_query(engine: Engine, query: str) -> list[str]:
+def _execute_query(engine: Engine, query: str, params: dict[str, Any] | None = None) -> list[str]:
     """Execute a query and return the results."""
     with engine.connect() as connection:
-        result = connection.execute(text(query))
+        result = connection.execute(text(query), params)
         return [str(row) for row in result.fetchall()]
