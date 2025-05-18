@@ -27,7 +27,7 @@ def test_get_table_schema() -> None:
     ]
 
 
-# def test_execute_query() -> None:
-#     assert execute_query(context, "SELECT * FROM users WHERE id = 1") == [
-#         {"id": 1, "name": "John", "email": "john@example.com"}
-#     ]
+def test_execute_query() -> None:
+    assert execute_query(context, "SELECT id, name, email FROM users WHERE id = 1") == [
+        "(1, 'Mario', 'mario@example.com')"
+    ]
