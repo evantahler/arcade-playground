@@ -58,7 +58,11 @@ def update_user_status(
     engine = _get_engine(
         context.get_secret("DATABASE_CONNECTION_STRING"), isolation_level="READ COMMITTED"
     )
-    query = f"UPDATE users SET status = '{status}' WHERE id = {user_id} LIMIT 1 RETURNING *"  # noqa: S608
+    query = text(
+        "UPDATE users SET status = :status WHERE id = :user_id LIMIT 1 RETURNING *",
+        status=status,
+        user_id=user_id,
+    )
     return _execute_query(engine, query)
 
 
