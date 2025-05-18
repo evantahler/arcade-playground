@@ -9,7 +9,12 @@ from arcade.sdk.eval import (
 )
 
 import arcade_sql
-from arcade_sql.tools.sql import discover_tables, execute_query, get_table_schema
+from arcade_sql.tools.sql import (
+    discover_tables,
+    execute_query,
+    get_table_schema,
+    update_user_status,
+)
 
 # Evaluation rubric
 rubric = EvalRubric(
@@ -85,6 +90,34 @@ def sql_eval_suite() -> EvalSuite:
         critics=[
             BinaryCritic(critic_field="schema_name", weight=0.5),
             BinaryCritic(critic_field="table_name", weight=0.5),
+        ],
+    )
+
+    suite.add_case(
+        name="Update user status (with id)",
+        user_message="Update user #1 to be active",
+        expected_tool_calls=[
+            ExpectedToolCall(func=update_user_status, args={"user_id": 1, "status": "active"}),
+        ],
+        rubric=rubric,
+        critics=[
+            BinaryCritic(critic_field="user_id", weight=0.5),
+            BinaryCritic(critic_field="status", weight=0.5),
+        ],
+    )
+
+    suite.add_case(
+        name="Update user status (without id)",
+        user_message="Update the status of the user with the email 'mario@example.com' to be active",  # noqa: E501
+        expected_tool_calls=[
+            ExpectedToolCall(
+                func=discover_tables,
+                args={},
+            ),
+        ],
+        rubric=rubric,
+        critics=[
+            BinaryCritic(critic_field="query", weight=1.0),
         ],
     )
 

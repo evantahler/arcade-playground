@@ -1,15 +1,8 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from arcade.sdk import ToolContext, tool
 from arcade.sdk.errors import RetryableToolError
 from sqlalchemy import Engine, create_engine, inspect, text
-
-# NOTE: it looks like tool responses are limited to simple python types (str, int, list, etc.)
-# class SqlColumn(BaseModel):
-#     column_name: str
-#     column_type: str
-
-# NOTE: There is no documentation on how to use the ToolContext & get_secret (I grabbed this from the source code and types).  # noqa: E501
 
 
 @tool(requires_secrets=["DATABASE_CONNECTION_STRING"])
@@ -51,9 +44,30 @@ def execute_query(
         ) from e
 
 
-def _get_engine(connection_string: str) -> Engine:
+USER_STATUSES = Literal["active", "inactive", "pending", "banned"]
+
+
+@tool(requires_secrets=["DATABASE_CONNECTION_STRING"])
+def update_user_status(
+    context: ToolContext,
+    user_id: Annotated[int, "The ID of the user to update"],
+    status: Annotated[USER_STATUSES, "The status to update the user to"],
+) -> list[str]:
+    """You have a connection to a SQL database.  Update the status of a user in the SQL database.  The user status is stored in the 'status' column of the 'users' table"""  # noqa: E501
+    status = status.lower()
+    if status not in USER_STATUSES:
+        raise ValueError(f"Invalid status: {status}.  Valid statuses are: {USER_STATUSES}")  # noqa: TRY003
+
+    engine = _get_engine(
+        context.get_secret("DATABASE_CONNECTION_STRING"), isolation_level="READ COMMITTED"
+    )
+    query = f"UPDATE users SET status = '{status}' WHERE id = {user_id} LIMIT 1 RETURNING *"  # noqa: S608
+    return _execute_query(engine, query)
+
+
+def _get_engine(connection_string: str, isolation_level: str = "READ UNCOMMITTED") -> Engine:
     """Get a connection to the database.  Note that we build the engine with an isolation level of READ UNCOMMITTED to prevent all writes."""  # noqa: E501
-    return create_engine(connection_string, isolation_level="READ UNCOMMITTED")
+    return create_engine(connection_string, isolation_level=isolation_level)
 
 
 def _get_tables(engine: Engine, schema_name: str) -> list[str]:
