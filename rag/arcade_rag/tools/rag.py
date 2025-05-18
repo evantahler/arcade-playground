@@ -133,3 +133,4 @@ def build_object_storage_client(context: ToolContext):
 
 def build_database_client(context: ToolContext):
     return DuckDBDatabase(context.get_secret("RAG_DATABASE_FILE"))
+
