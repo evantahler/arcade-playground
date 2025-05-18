@@ -38,7 +38,7 @@ def get_table_schema(
 def execute_query(
     context: ToolContext, query: Annotated[str, "The SQL query to execute"]
 ) -> list[str]:
-    """Execute a query and return the results against the SQL database"""
+    """You have a connection to a SQL database.  Execute a query and return the results against the SQL database"""  # noqa: E501
     engine = _get_engine(context.get_secret("DATABASE_CONNECTION_STRING"))
     try:
         return _execute_query(engine, query)
