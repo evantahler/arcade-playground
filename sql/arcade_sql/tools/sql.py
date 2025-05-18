@@ -46,7 +46,7 @@ def execute_query(
         raise RetryableToolError(  # noqa: TRY003
             "Query failed",
             developer_message=f"Query '{query}' failed.",
-            additional_prompt_content="Load the database schema (<get_table_schema>) and try again.",  # noqa: E501
+            additional_prompt_content="Load the database schema (<GetTableSchema>) and try again.",  # noqa: E501
             retry_after_ms=10,
         ) from e
 
