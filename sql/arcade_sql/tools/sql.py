@@ -22,7 +22,10 @@ def get_table_schema(
     schema_name: Annotated[str, "The database schema to get the table schema of"],
     table_name: Annotated[str, "The table to get the schema of"],
 ) -> list[str]:
-    """Get the schema of a table in the SQL database when the schema is not known, but the name of the table is provided"""  # noqa: E501
+    """
+    Get the schema of a table in the SQL database when the schema is not known,
+    but the name of the table is provided
+    """
     engine = _get_engine(context.get_secret("DATABASE_CONNECTION_STRING"))
     return _get_table_schema(engine, schema_name, table_name)
 
@@ -31,7 +34,10 @@ def get_table_schema(
 def execute_query(
     context: ToolContext, query: Annotated[str, "The SQL query to execute"]
 ) -> list[str]:
-    """You have a connection to a SQL database.  Execute a query and return the results against the SQL database"""  # noqa: E501
+    """
+    You have a connection to a SQL database.
+    Execute a query and return the results against the SQL database
+    """
     engine = _get_engine(context.get_secret("DATABASE_CONNECTION_STRING"))
     try:
         return _execute_query(engine, query)
@@ -68,7 +74,10 @@ def update_user_status(
 
 
 def _get_engine(connection_string: str, isolation_level: str = "READ UNCOMMITTED") -> Engine:
-    """Get a connection to the database.  Note that we build the engine with an isolation level of READ UNCOMMITTED to prevent all writes."""  # noqa: E501
+    """
+    Get a connection to the database.
+    Note that we build the engine with an isolation level of READ UNCOMMITTED to prevent all writes.
+    """
     return create_engine(connection_string, isolation_level=isolation_level)
 
 
