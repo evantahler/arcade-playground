@@ -1,8 +1,22 @@
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, ClassVar, Literal
 
 from arcade.sdk import ToolContext, tool
 from arcade.sdk.errors import RetryableToolError
 from sqlalchemy import Engine, create_engine, inspect, text
+
+
+class DatabaseEngine:
+    _instance: ClassVar[None] = None
+    _engines: ClassVar[dict[str, Engine]] = {}
+
+    @classmethod
+    def get_instance(
+        cls, connection_string: str, isolation_level: str = "READ UNCOMMITTED"
+    ) -> Engine:
+        key = f"{connection_string}:{isolation_level}"
+        if key not in cls._engines:
+            cls._engines[key] = create_engine(connection_string, isolation_level=isolation_level)
+        return cls._engines[key]
 
 
 @tool(requires_secrets=["DATABASE_CONNECTION_STRING"])
@@ -78,7 +92,7 @@ def _get_engine(connection_string: str, isolation_level: str = "READ UNCOMMITTED
     Get a connection to the database.
     Note that we build the engine with an isolation level of READ UNCOMMITTED to prevent all writes.
     """
-    return create_engine(connection_string, isolation_level=isolation_level)
+    return DatabaseEngine.get_instance(connection_string, isolation_level)
 
 
 def _get_tables(engine: Engine, schema_name: str) -> list[str]:
